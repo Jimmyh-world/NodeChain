@@ -1,15 +1,57 @@
 import { Blockchain } from '../models/blockchain.js';
 import { createError, asyncHandler } from '../utils/errorHandler.js';
+import { saveBlockchain, loadBlockchain } from '../utils/fileManager.js';
 import logger from '../utils/logger.js';
 
 /**
  * Block Controller for NodeChain REST API
  * Handles all blockchain-related HTTP requests and responses
+ * Now includes file-based persistence for blockchain data
  */
 
-// In-memory blockchain instance (mocking file persistence for now)
-// TODO: Replace with file-based persistence in next phase
-let blockchain = new Blockchain(4); // Difficulty of 4 for reasonable mining time
+// Initialize blockchain instance with persistence
+let blockchain = null;
+
+/**
+ * Initializes the blockchain instance by loading from file or creating new one
+ * This function is called when the controller module is loaded
+ */
+const initializeBlockchain = async () => {
+  try {
+    logger.info('Initializing blockchain controller...');
+
+    // Try to load existing blockchain from file
+    blockchain = await loadBlockchain();
+
+    if (!blockchain) {
+      // No existing blockchain found, create new one
+      logger.info('Creating new blockchain instance');
+      blockchain = new Blockchain(4); // Difficulty of 4 for reasonable mining time
+
+      // Save the new blockchain immediately
+      const saved = await saveBlockchain(blockchain);
+      if (saved) {
+        logger.info('New blockchain created and saved successfully');
+      } else {
+        logger.error(
+          'Failed to save new blockchain - continuing with in-memory only'
+        );
+      }
+    }
+
+    logger.info(
+      `Blockchain controller initialized with ${blockchain.getBlockCount()} blocks`
+    );
+  } catch (error) {
+    logger.error(`Failed to initialize blockchain: ${error.message}`);
+    // Fallback to new blockchain if initialization fails
+    logger.info('Falling back to new in-memory blockchain');
+    blockchain = new Blockchain(4);
+  }
+};
+
+// Initialize blockchain when module loads
+await initializeBlockchain();
 
 /**
  * Creates a new block with the provided transaction data
@@ -70,6 +112,16 @@ export const createBlock = asyncHandler(async (req, res, next) => {
     const newBlock = blockchain.getLatestBlock();
     logger.info(`Block mined successfully: ${newBlock.hash}`);
 
+    // Save updated blockchain to file
+    const saved = await saveBlockchain(blockchain);
+    if (saved) {
+      logger.info('Blockchain saved to file after new block creation');
+    } else {
+      logger.error(
+        'Failed to save blockchain to file - data persists in memory only'
+      );
+    }
+
     // Return success response with new block data
     res.status(201).json({
       success: true,
@@ -85,6 +137,7 @@ export const createBlock = asyncHandler(async (req, res, next) => {
         },
         chainLength: blockchain.getBlockCount(),
         difficulty: blockchain.difficulty,
+        persisted: saved, // Indicate if data was saved to file
       },
     });
   } catch (error) {
@@ -195,7 +248,7 @@ export const getBlockById = asyncHandler(async (req, res, next) => {
 
 /**
  * Gets blockchain statistics and health information
- * GET /blocks/stats (this would be handled by a separate route)
+ * GET /blocks/stats
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
  * @param {Function} next - Express next middleware function
