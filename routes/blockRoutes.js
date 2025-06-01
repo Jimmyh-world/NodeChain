@@ -3,12 +3,11 @@ import {
   createBlock,
   getAllBlocks,
   getBlockById,
-  getBlockchainStats,
 } from '../controllers/blockController.js';
 
 /**
  * Block Routes for NodeChain REST API
- * Defines all blockchain-related HTTP endpoints
+ * Defines basic blockchain HTTP endpoints
  */
 
 const router = express.Router();
@@ -24,22 +23,15 @@ router.get('/', getAllBlocks);
  * @route   POST /blocks
  * @desc    Create a new block with transaction data
  * @access  Public
- * @body    { sender: string, receiver: string, amount: number, metadata?: object }
+ * @body    { sender: string, receiver: string, amount: number }
  */
 router.post('/', createBlock);
 
 /**
- * @route   GET /blocks/stats
- * @desc    Get blockchain statistics and health information
- * @access  Public
- */
-router.get('/stats', getBlockchainStats);
-
-/**
  * @route   GET /blocks/:id
- * @desc    Get a specific block by index (number) or hash (string)
+ * @desc    Get a specific block by index
  * @access  Public
- * @param   id - Block index (0, 1, 2...) or hash (0x123abc...)
+ * @param   id - Block index (0, 1, 2...)
  */
 router.get('/:id', getBlockById);
 
