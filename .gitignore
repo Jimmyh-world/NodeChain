@@ -1,0 +1,15 @@
+# Dependencies
+node_modules/
+
+# Logs
+logs/
+*.log
+
+# Data files
+blockchain.json
+
+# Environment variables
+.env
+
+# IDE/Editor files
+.cursor/ 

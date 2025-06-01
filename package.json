@@ -1,0 +1,25 @@
+{
+  "name": "nodechain",
+  "version": "1.0.0",
+  "description": "A simple Node.js blockchain REST API for educational purposes",
+  "author": "James",
+  "type": "module",
+  "main": "app.js",
+  "scripts": {
+    "test": "vitest run",
+    "start": "node app.js",
+    "dev": "node --watch app.js"
+  },
+  "keywords": [
+    "blockchain",
+    "api",
+    "nodejs",
+    "express",
+    "rest"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "express": "^5.1.0",
+    "vitest": "^3.1.4"
+  }
+}
