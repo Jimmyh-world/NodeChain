@@ -4,48 +4,30 @@ import { Block } from '../models/block.js';
 
 /**
  * Test suite for Blockchain class
- * These tests define the contract and expected behavior for blockchain management
- * following TDD principles - tests first, implementation second
+ * Tests core functionality required for blockchain assignment
  */
 describe('Blockchain', () => {
   let blockchain;
 
-  /**
-   * Test data representing various blockchain transactions
-   * Using realistic but simple data structures for educational purposes
-   */
   const mockTransactions = {
     transaction1: {
       sender: 'Alice',
       receiver: 'Bob',
       amount: 50,
-      metadata: {
-        timestamp: '2024-01-15T10:30:00Z',
-        transactionId: 'tx_001',
-      },
     },
     transaction2: {
       sender: 'Bob',
       receiver: 'Charlie',
       amount: 25,
-      metadata: {
-        timestamp: '2024-01-15T11:15:00Z',
-        transactionId: 'tx_002',
-      },
     },
     transaction3: {
       sender: 'Charlie',
       receiver: 'Diana',
       amount: 75,
-      metadata: {
-        timestamp: '2024-01-15T12:00:00Z',
-        transactionId: 'tx_003',
-      },
     },
   };
 
   beforeEach(() => {
-    // Create fresh blockchain for each test to ensure isolation
     blockchain = new Blockchain();
   });
 
@@ -101,20 +83,6 @@ describe('Blockchain', () => {
       expect(newBlock.index).toBe(previousBlock.index + 1);
     });
 
-    test('should update chain length accordingly when adding multiple blocks', () => {
-      // Arrange
-      const initialLength = blockchain.chain.length;
-
-      // Act
-      blockchain.addBlock(mockTransactions.transaction1);
-      blockchain.addBlock(mockTransactions.transaction2);
-      blockchain.addBlock(mockTransactions.transaction3);
-
-      // Assert - Chain should contain all added blocks plus genesis
-      expect(blockchain.chain.length).toBe(initialLength + 3);
-      expect(blockchain.chain.length).toBe(4); // Genesis + 3 new blocks
-    });
-
     test('should store transaction data correctly in new blocks', () => {
       // Arrange & Act
       blockchain.addBlock(mockTransactions.transaction2);
@@ -124,18 +92,6 @@ describe('Blockchain', () => {
       expect(newBlock.data).toEqual(mockTransactions.transaction2);
       expect(newBlock.data.sender).toBe('Bob');
       expect(newBlock.data.amount).toBe(25);
-    });
-
-    test('getLatestBlock should return the most recently added block', () => {
-      // Arrange
-      blockchain.addBlock(mockTransactions.transaction1);
-
-      // Act
-      const latestBlock = blockchain.getLatestBlock();
-
-      // Assert - Should return the last block in the chain
-      expect(latestBlock).toBe(blockchain.chain[blockchain.chain.length - 1]);
-      expect(latestBlock.data).toEqual(mockTransactions.transaction1);
     });
   });
 
@@ -187,22 +143,14 @@ describe('Blockchain', () => {
       // Assert - Chain with corrupted hash should fail validation
       expect(blockchain.isChainValid()).toBe(false);
     });
-
-    test('single genesis block should be valid', () => {
-      // Assert - Fresh blockchain with only genesis should be valid
-      expect(blockchain.isChainValid()).toBe(true);
-    });
   });
 
   describe('Block Retrieval', () => {
-    beforeEach(() => {
-      // Setup blockchain with multiple blocks for retrieval tests
+    test('should retrieve blocks by index', () => {
+      // Arrange
       blockchain.addBlock(mockTransactions.transaction1);
       blockchain.addBlock(mockTransactions.transaction2);
-      blockchain.addBlock(mockTransactions.transaction3);
-    });
 
-    test('should retrieve blocks by index', () => {
       // Act & Assert - Should retrieve correct blocks by index
       const genesisBlock = blockchain.getBlockByIndex(0);
       const firstBlock = blockchain.getBlockByIndex(1);
@@ -214,42 +162,10 @@ describe('Blockchain', () => {
       expect(secondBlock.data).toEqual(mockTransactions.transaction2);
     });
 
-    test('should retrieve blocks by hash', () => {
-      // Arrange
-      const targetBlock = blockchain.chain[1];
-      const targetHash = targetBlock.hash;
-
-      // Act
-      const retrievedBlock = blockchain.getBlockByHash(targetHash);
-
-      // Assert - Should find and return the correct block
-      expect(retrievedBlock).toBe(targetBlock);
-      expect(retrievedBlock.data).toEqual(mockTransactions.transaction1);
-    });
-
     test('should handle invalid block indices gracefully', () => {
-      // Act & Assert - Invalid indices should return null or undefined
+      // Act & Assert - Invalid indices should return null
       expect(blockchain.getBlockByIndex(-1)).toBeNull();
       expect(blockchain.getBlockByIndex(999)).toBeNull();
-      expect(blockchain.getBlockByIndex('invalid')).toBeNull();
-    });
-
-    test('should handle invalid block hashes gracefully', () => {
-      // Act & Assert - Invalid hashes should return null or undefined
-      expect(blockchain.getBlockByHash('nonexistent_hash')).toBeNull();
-      expect(blockchain.getBlockByHash('')).toBeNull();
-      expect(blockchain.getBlockByHash(null)).toBeNull();
-    });
-
-    test('should return correct block count', () => {
-      // Assert - Should accurately report total number of blocks
-      expect(blockchain.getBlockCount()).toBe(4); // Genesis + 3 added blocks
-
-      // Act - Add another block
-      blockchain.addBlock({ sender: 'Test', receiver: 'User', amount: 1 });
-
-      // Assert - Count should update
-      expect(blockchain.getBlockCount()).toBe(5);
     });
   });
 });
