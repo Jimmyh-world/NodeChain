@@ -3,26 +3,15 @@ import { createError } from '../utils/errorHandler.js';
 import { saveBlockchain, loadBlockchain } from '../utils/fileManager.js';
 import logger from '../utils/logger.js';
 
-/**
- * Block Controller for NodeChain REST API
- * Handles blockchain-related HTTP requests with file persistence
- */
-
-// Initialize blockchain instance
 let blockchain = null;
 
-/**
- * Initializes the blockchain instance by loading from file or creating new one
- */
 const initializeBlockchain = async () => {
   try {
     logger.info('Initializing blockchain controller...');
 
-    // Try to load existing blockchain from file
     blockchain = await loadBlockchain();
 
     if (!blockchain) {
-      // Create new blockchain
       logger.info('Creating new blockchain instance');
       blockchain = new Blockchain(4);
       await saveBlockchain(blockchain);
@@ -37,18 +26,12 @@ const initializeBlockchain = async () => {
   }
 };
 
-// Initialize when module loads
 await initializeBlockchain();
 
-/**
- * Creates a new block with transaction data
- * POST /blocks
- */
 export const createBlock = async (req, res, next) => {
   try {
     const { sender, receiver, amount } = req.body;
 
-    // Validate required fields
     if (!sender || !receiver || amount === undefined) {
       return next(
         createError(
@@ -58,7 +41,6 @@ export const createBlock = async (req, res, next) => {
       );
     }
 
-    // Validate types
     if (typeof amount !== 'number' || amount < 0) {
       return next(createError('Amount must be a positive number', 400));
     }
@@ -67,14 +49,12 @@ export const createBlock = async (req, res, next) => {
       return next(createError('Sender and receiver must be strings', 400));
     }
 
-    // Create transaction data
     const transactionData = {
       sender: sender.trim(),
       receiver: receiver.trim(),
       amount,
     };
 
-    // Add block to blockchain
     logger.info(
       `Mining new block for transaction: ${sender} -> ${receiver} (${amount})`
     );
@@ -83,10 +63,8 @@ export const createBlock = async (req, res, next) => {
     const newBlock = blockchain.getLatestBlock();
     logger.info(`Block mined successfully: ${newBlock.hash}`);
 
-    // Save blockchain to file
     await saveBlockchain(blockchain);
 
-    // Return response
     res.status(201).json({
       success: true,
       message: 'Block created and mined successfully',
@@ -105,11 +83,7 @@ export const createBlock = async (req, res, next) => {
   }
 };
 
-/**
- * Retrieves all blocks in the blockchain
- * GET /blocks
- */
-export const getAllBlocks = async (req, res, next) => {
+export const getAllBlocks = async (_req, res, next) => {
   try {
     const blocks = blockchain.chain.map((block) => ({
       index: block.index,
@@ -133,10 +107,6 @@ export const getAllBlocks = async (req, res, next) => {
   }
 };
 
-/**
- * Retrieves a specific block by index
- * GET /blocks/:id
- */
 export const getBlockById = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -145,13 +115,11 @@ export const getBlockById = async (req, res, next) => {
       return next(createError('Block ID is required', 400));
     }
 
-    // Parse index
     const index = parseInt(id);
     if (isNaN(index) || index.toString() !== id) {
       return next(createError('Block ID must be a valid index number', 400));
     }
 
-    // Get block by index
     const block = blockchain.getBlockByIndex(index);
 
     if (!block) {

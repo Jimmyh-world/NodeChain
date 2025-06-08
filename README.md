@@ -10,7 +10,7 @@ A minimal Node.js blockchain implementation with Express REST API, built followi
 - **Proof-of-Work**: SHA-256 mining with configurable difficulty (4 leading zeros)
 - **Simple Transactions**: Support for sender, receiver, and amount
 - **Index-Based Retrieval**: Get blocks by index (0, 1, 2...)
-- **TDD Approach**: 28 comprehensive tests covering all core functionality
+- **TDD Approach**: 17 comprehensive tests covering all core functionality
 - **ES6 Modules**: Modern JavaScript throughout
 - **MVC Pattern**: Clean separation of models, controllers, routes
 - **Basic Error Handling**: Centralized error middleware with structured responses
@@ -77,7 +77,7 @@ curl http://localhost:3000/blocks/1
 /models         → Data models (Block, Blockchain)
 /routes         → Express routes (blockRoutes.js)
 /utils          → Logger, error handler, file manager
-/tests          → Unit tests (Jest/Vitest)
+/tests          → Unit tests (Vitest)
 /app.js         → Main Express app
 /blockchain.json → Persistent blockchain data file
 ```
@@ -160,14 +160,14 @@ Tests cover:
 ## 🚀 Development
 
 ```bash
-# Start development server
+# Start the server
 npm start
 
-# Run tests in watch mode
-npm run test:watch
+# Start development server with auto-restart
+npm run dev
 
-# Check code formatting
-npm run lint
+# Run tests
+npm test
 ```
 
 ## 📄 License
@@ -176,8 +176,8 @@ MIT License - see LICENSE file for details
 
 ## 👨‍💻 Author
 
-**James** - Full-stack development student focusing on blockchain technology
+**James Barclay**
 
 ---
 
-_This project demonstrates a complete blockchain implementation following KISS principles while meeting all academic assignment requirements._
+_This project demonstrates a complete blockchain implementation following KISS & DRY principles while meeting all assignment requirements._
